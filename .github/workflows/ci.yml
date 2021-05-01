@@ -3,7 +3,7 @@ name: continuous integration
 on: push
 
 jobs:
-  build-publish:
+  build-artifact:
     name: Build
     runs-on: ubuntu-18.04
 
@@ -37,3 +37,27 @@ jobs:
       with:
         name: python27-switch
         path: python27-switch.tar.gz
+
+  create-release:
+    needs: [build-artifact]
+    runs-on: ubuntu-20.04
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download stdlib artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: python27-stdlib
+
+    - name: Download prefix artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: python27-switch
+
+    - name: Create release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: "${{ contains(github.ref, '-rc') }}"
+        files: |
+          python27-stdlib/*
+          python27-switch/*
