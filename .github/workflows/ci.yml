@@ -1,0 +1,39 @@
+name: continuous integration
+
+on: push
+
+jobs:
+  build-publish:
+    name: Build
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@master
+      with:
+        submodules: recursive
+    - name: setup environment
+      run: >-
+        sudo bash setup.bash
+    - name: setup docker
+      run: >-
+        sudo bash setup-docker.bash
+    - name: extract
+      run: >-
+        bash extract.bash
+    - name: config and build
+      run: >-
+        sudo bash build-switch-docker.bash
+    - name: package stdlib
+      run: >-
+        bash package-stdlib.bash
+    - name: upload stdlib artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: python27-stdlib
+        path: python27.zip
+    - name: upload prefix artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: python27-switch
+        path: python27-switch.tar.gz
